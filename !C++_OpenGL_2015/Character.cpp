@@ -6,20 +6,52 @@ Character::Character(float _x, float _y, float _z) {
 	w = 15; h = 40; speed = 40;
 	onGround = false;
 }
-
-void Character::update(float time) {
+Character::Character(float _x, float _z) {
+	xPos = _x; yPos = 300; zPos = _z;
+	dx = 0; dy = 0; dz = 0;
+	w = 15; h = 40; speed = 40;
+	onGround = false;
+}
+void Character::update(float time, std::vector<Wall> walls) {
 	if (!onGround)
 		dy -= 1.5*time;
 	//onGround = 0;
 	xPos += dx*time;
-	collision(dx, 0, 0);
+	collision(dx, 0, 0,walls);
 	yPos += dy*time;
-	collision(0, dy, 0);
+	collision(0, dy, 0,walls);
 	zPos += dz*time;
-	collision(0, 0, dz);
+	collision(0, 0, dz,walls);
 	dx = dz = 0;
 }
+bool Character::commonSectionCircle(Wall wall) {
+	float x1, x2, y1, y2;
+	if (wall.orient == Horizontal) {
+		x1 = wall.xPos - wall.size / 2;
+		x2 = wall.xPos + wall.size / 2;
+		y1 = y2 = wall.zPos;
+	}
+	else {
+		y1 = wall.zPos - wall.size / 2;
+		y2 = wall.zPos + wall.size / 2;
+		x1 = x2 = wall.xPos;
+	}
+	x1 -= this->xPos;
+	y1 -= this->zPos;
+	x2 -= this->xPos;
+	y2 -= this->zPos;
 
+	double dx = x2 - x1;
+	double dy = y2 - y1;
+	double a = dx*dx + dy*dy;
+	double b = 2.*(x1*dx + y1*dy);
+	double c = x1*x1 + y1*y1 - this->w*this->w * 6;
+	if (-b < 0)
+		return (c < 0);
+	if (-b < (2.*a))
+		return ((4.*a*c - b*b) < 0);
+	return (a + b + c < 0);
+}
 void Character::keyboard(float angleX, float angleY) {
 	if (Keyboard::isKeyPressed(Keyboard::W)) {
 		dx = -sin(angleX / 180 * PI) * speed;
@@ -46,15 +78,23 @@ void Character::keyboard(float angleX, float angleY) {
 			dy = 20;
 		}
 }
-void Character::collision(float dx, float dy, float dz) {
+void Character::collision(float dx, float dy, float dz,std::vector<Wall> walls) {
 	if (yPos <= h * 3 + 10 && dy < 0) {
 		onGround = true;
 		dy = 0;
 		yPos = h * 3 + 10;
 	}
-//	if (isColided)
-//	if (dx > 0)  xPos -= w;
-//	if (dx < 0)  xPos += w;
-//	if (dz > 0)  zPos -= w;
-//	if (dz < 0)  zPos += w;
+	if (isColided(walls)) {
+		if (dx>0)  xPos -= w;
+		if (dx<0)  xPos += w;
+		if (dz>0)  zPos -= w;
+		if (dz<0)  zPos += w;
+	}
+}
+bool Character::isColided(std::vector<Wall>walls) {
+	for (int i = 0; i < walls.size(); i++)
+		if (commonSectionCircle(walls[i])) {
+			return true;
+		}
+	return false;
 }

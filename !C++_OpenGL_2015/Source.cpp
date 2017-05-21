@@ -8,49 +8,13 @@
 using namespace sf;
 float const PI = 3.1415;
 #endif
-#include "Character.h"
 #include "Wall.h"
+#include "Character.h"
+
 
 #include <iostream>
 #include "Source.h"
 
-bool commonSectionCircle(Character pl, Wall wall) {
-	float x1, x2, y1, y2;
-	if (wall.orient == Horizontal) {
-		x1 = wall.xPos - wall.size/2;
-		x2 = wall.xPos + wall.size/2;
-		y1 = y2 = wall.zPos;
-	}
-	else {
-		y1 = wall.zPos - wall.size / 2;
-		y2 = wall.zPos + wall.size / 2;
-		x1 = x2 = wall.xPos;
-	}
-	x1 -= pl.xPos;
-	y1 -= pl.zPos;
-	x2 -= pl.xPos;
-	y2 -= pl.zPos;
-
-	double dx = x2 - x1;
-	double dy = y2 - y1;
-	double a = dx*dx + dy*dy;
-	double b = 2.*(x1*dx + y1*dy);
-	double c = x1*x1 + y1*y1 - pl.w*pl.w*6;
-	if (-b < 0)
-		return (c < 0);
-	if (-b < (2.*a))
-		return ((4.*a*c - b*b) < 0);
-	return (a + b + c < 0);
-}
-bool isColided(Character pl, std::vector<Wall>walls) {
-	for (int i = 0; i < walls.size(); i++)
-		if (commonSectionCircle(pl, walls[i])) {
-				return true;
-		}
-			
-	return false;
-
-}
 
 int displX = 1920, displY = 1080;
 float angleX, angleY;
@@ -133,7 +97,7 @@ int main() {
 	gluPerspective(90.f, 1.f, 1.f, 30000.f);
 	glEnable(GL_TEXTURE_2D);
 
-	Character pl(150, 300, 150);
+	Character pl(150, 150);
 	Clock clock;
 	//Main cycle is here
 	while (window.isOpen()) {
@@ -149,7 +113,8 @@ int main() {
 				window.close();
 		}
 		pl.keyboard(angleX,angleY);
-		pl.update(time);
+		std::vector<Wall> walls;
+	
 
 		rotateCam(window);
 
@@ -167,13 +132,13 @@ int main() {
 			pl.zPos - cos(angleX / 180 * PI),
 			0, 1, 0);
 		
-		std::vector<Wall> walls;
 		generateOuterWalls(walls, texture);
-		if (isColided(pl, walls)) 			{
-			pl.collision(pl.dx,pl.dy,pl.dz);
-		}
-		
-		std::cout << pl.xPos << " " << pl.zPos << " | " <<  isColided(pl,walls) << std::endl;
+		pl.update(time, walls);
+		/*if (isColided(pl, walls)) 			{*/
+		//	pl.collision(pl.dx,pl.dy,pl.dz);
+		//}
+		//
+		//std::cout << pl.xPos << " " << pl.zPos << " | " <<  isColided(pl,walls) << std::endl;
 		window.display();
 	}
 	glDeleteTextures(1, &texture);
