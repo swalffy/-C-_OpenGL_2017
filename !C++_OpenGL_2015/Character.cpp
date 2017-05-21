@@ -15,13 +15,12 @@ Character::Character(float _x, float _z) {
 void Character::update(float time, std::vector<Wall> walls) {
 	if (!onGround)
 		dy -= 1.5*time;
-	//onGround = 0;
 	xPos += dx*time;
-	collision(dx, 0, 0,walls);
+	collision(dx, 0, 0, walls);
 	yPos += dy*time;
-	collision(0, dy, 0,walls);
+	collision(0, dy, 0, walls);
 	zPos += dz*time;
-	collision(0, 0, dz,walls);
+	collision(0, 0, dz, walls);
 	dx = dz = 0;
 }
 bool Character::commonSectionCircle(Wall wall) {
@@ -78,17 +77,17 @@ void Character::keyboard(float angleX, float angleY) {
 			dy = 20;
 		}
 }
-void Character::collision(float dx, float dy, float dz,std::vector<Wall> walls) {
+void Character::collision(float dx, float dy, float dz, std::vector<Wall> walls) {
 	if (yPos <= h * 3 + 10 && dy < 0) {
 		onGround = true;
 		dy = 0;
 		yPos = h * 3 + 10;
 	}
 	if (isColided(walls)) {
-		if (dx>0)  xPos -= w;
-		if (dx<0)  xPos += w;
-		if (dz>0)  zPos -= w;
-		if (dz<0)  zPos += w;
+		if (dx > 0)  xPos -= w;
+		if (dx < 0)  xPos += w;
+		if (dz > 0)  zPos -= w;
+		if (dz < 0)  zPos += w;
 	}
 }
 bool Character::isColided(std::vector<Wall>walls) {

@@ -12,6 +12,15 @@ enum orientation {
 	Horizontal = 0,
 	Vertikal = 1
 };
+class Stage {
+protected:
+	float size;
+	GLuint texture;
+public:
+	Stage();
+	Stage(float, GLuint);
+};
+
 class Wall {
 private:
 	GLuint texture;
@@ -20,5 +29,5 @@ public:
 	float xPos, zPos;
 	orientation orient;
 	Wall();
-	Wall(float, GLuint,orientation, float, float);
+	Wall(float, GLuint, orientation, float, float);
 };

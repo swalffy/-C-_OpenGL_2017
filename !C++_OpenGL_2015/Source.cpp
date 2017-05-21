@@ -10,8 +10,6 @@ float const PI = 3.1415;
 #endif
 #include "Wall.h"
 #include "Character.h"
-
-
 #include <iostream>
 #include "Source.h"
 
@@ -34,68 +32,17 @@ GLuint GetTexture(sf::String name) {
 
 	return texture;
 }
-class Stage {
-protected:
-	float size;
-	GLuint texture;
-public:
-	Stage() {}
-	Stage(float _size, GLuint _texture) {
-		size = _size;
-		texture = _texture;
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glBegin(GL_QUADS);
 
-		glTexCoord2f(0, 0); glVertex3f(-size, -2, -size);
-		glTexCoord2f(1, 0); glVertex3f(size, -2, -size);
-		glTexCoord2f(1, 1); glVertex3f(size, 2, -size);
-		glTexCoord2f(0, 1); glVertex3f(-size, 2, -size);
-
-		glTexCoord2f(0, 0); glVertex3f(size, -2, size);
-		glTexCoord2f(1, 0); glVertex3f(-size, -2, size);
-		glTexCoord2f(1, 1); glVertex3f(-size, 2, size);
-		glTexCoord2f(0, 1); glVertex3f(size, 2, size);
-
-		glTexCoord2f(0, 0); glVertex3f(-size, -2, size);
-		glTexCoord2f(1, 0); glVertex3f(-size, -2, -size);
-		glTexCoord2f(1, 1); glVertex3f(-size, 2, -size);
-		glTexCoord2f(0, 1); glVertex3f(-size, 2, size);
-
-		glTexCoord2f(0, 0); glVertex3f(size, -2, -size);
-		glTexCoord2f(1, 0); glVertex3f(size, -2, size);
-		glTexCoord2f(1, 1); glVertex3f(size, 2, size);
-		glTexCoord2f(0, 1); glVertex3f(size, 2, -size);
-
-		glTexCoord2f(0, 0); glVertex3f(-size, -2, size);
-		glTexCoord2f(1, 0); glVertex3f(size, -2, size);
-		glTexCoord2f(1, 1); glVertex3f(size, -2, -size);
-		glTexCoord2f(0, 1); glVertex3f(-size, -2, -size);
-
-		glTexCoord2f(0, 0); glVertex3f(-size, 2, -size);
-		glTexCoord2f(1, 0); glVertex3f(size, 2, -size);
-		glTexCoord2f(1, 1); glVertex3f(size, 2, size);
-		glTexCoord2f(0, 1); glVertex3f(-size, 2, size);
-
-		glEnd();
-	}
-};
 int main() {
 	RenderWindow window(VideoMode(displX, displY), "Escape from Labyrinth");
 	ShowCursor(FALSE);
 	Texture t;
 	t.loadFromFile("assets/background.jpg");
 	Sprite background(t);
-
 	GLuint texture;
 	texture = GetTexture("assets/myside.jpg");
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthMask(GL_TRUE);
-	glClearDepth(1.f);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(90.f, 1.f, 1.f, 30000.f);
-	glEnable(GL_TEXTURE_2D);
+	glutSettings();
 
 	Character pl(150, 150);
 	Clock clock;
@@ -112,9 +59,8 @@ int main() {
 			if (event.type == Event::Closed)
 				window.close();
 		}
-		pl.keyboard(angleX,angleY);
+		pl.keyboard(angleX, angleY);
 		std::vector<Wall> walls;
-	
 
 		rotateCam(window);
 
@@ -122,31 +68,40 @@ int main() {
 		window.draw(background);
 		window.popGLStates();
 
-		glClear(GL_DEPTH_BUFFER_BIT);
+		glutLookAt(pl);
 
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		gluLookAt(pl.xPos, pl.yPos + pl.h / 2, pl.zPos,
-			pl.xPos - sin(angleX / 180 * PI),
-			pl.yPos + pl.h / 2 + (tan(angleY / 180 * PI)),
-			pl.zPos - cos(angleX / 180 * PI),
-			0, 1, 0);
-		
 		generateOuterWalls(walls, texture);
 		pl.update(time, walls);
-		/*if (isColided(pl, walls)) 			{*/
-		//	pl.collision(pl.dx,pl.dy,pl.dz);
-		//}
-		//
-		//std::cout << pl.xPos << " " << pl.zPos << " | " <<  isColided(pl,walls) << std::endl;
 		window.display();
 	}
 	glDeleteTextures(1, &texture);
 	return 0;
 }
 
+void glutLookAt(Character &pl) {
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	gluLookAt(pl.xPos, pl.yPos + pl.h / 2, pl.zPos,
+		pl.xPos - sin(angleX / 180 * PI),
+		pl.yPos + pl.h / 2 + (tan(angleY / 180 * PI)),
+		pl.zPos - cos(angleX / 180 * PI),
+		0, 1, 0);
+}
+
+void glutSettings() {
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+	glClearDepth(1.f);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(90.f, 1.f, 1.f, 30000.f);
+	glEnable(GL_TEXTURE_2D);
+}
+
 void generateOuterWalls(std::vector<Wall> &walls, const GLuint &texture) {
-	
+
 	walls.push_back(Wall(stageSize * 2, texture, Vertikal, 0, stageSize));
 	walls.push_back(Wall(stageSize * 2, texture, Horizontal, stageSize, 0));
 	walls.push_back(Wall(stageSize * 2, texture, Horizontal, stageSize, stageSize * 2));

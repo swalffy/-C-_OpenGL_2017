@@ -10,7 +10,6 @@ float const PI = 3.1415;
 float size = 20.f;
 #endif
 #include "Wall.h"
-#include <iostream>
 class Character {
 public:
 	float xPos, yPos, zPos;
