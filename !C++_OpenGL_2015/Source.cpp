@@ -61,12 +61,12 @@ int main() {
 	mapline = "___|_____    ";
 	maplines.push_back(mapline);*/
 	sf::ContextSettings window_settings;
-	window_settings.depthBits = 24; 
-	window_settings.stencilBits = 8; 
-	window_settings.antialiasingLevel = 2; 
+	window_settings.depthBits = 24;
+	window_settings.stencilBits = 8;
+	window_settings.antialiasingLevel = 2;
 
 
-	RenderWindow window(VideoMode(displX, displY), "Escape from Labyrinth", sf::Style::Resize,window_settings);
+	RenderWindow window(VideoMode(displX, displY), "Escape from Labyrinth", sf::Style::Resize, window_settings);
 	ShowCursor(FALSE);
 	Texture t; t.loadFromFile("assets/background.jpg");
 	Sprite background(t);
@@ -148,23 +148,23 @@ void generateOuterWalls(std::vector<Wall> &walls, const GLuint &texture) {
 	Stage a(stageSize, texture);
 	glTranslatef(-stageSize, 0, -stageSize);
 }
-void generateInnerWalls(std::vector<Wall> &walls, const GLuint &texture,std::vector<std::string> &str) {
+void generateInnerWalls(std::vector<Wall> &walls, const GLuint &texture, std::vector<std::string> &str) {
 	// c - элементы строки
 	// e - сроки
-	for (int j = 0; j < str.size(); j++) 		{
+	for (int j = 0; j < str.size(); j++) {
 		int k = 0;
 		for (int i = 1; i <= str[j].size(); i++) {
 			if (str[j][i - 1] == ' ')
 				continue;
 			if (str[j][i - 1] == '|') {
-				walls.push_back(Wall(stageSize / 5, texture, Horizontal, stageSize / 10 * (j*2 + 1), stageSize / 10 * (i-k-1)*2));
+				walls.push_back(Wall(stageSize / 5, texture, Horizontal, stageSize / 10 * (j * 2 + 1), stageSize / 10 * (i - k - 1) * 2));
 				k++;
 			}
 			if (str[j][i - 1] == '_')
 				if (j == 19)
 					continue;
 				else
-					walls.push_back(Wall(stageSize / 5, texture, Vertikal, stageSize / 10 * (2 + 2 * j), stageSize / 10 * ((i-k) * 2 - 1)));
+					walls.push_back(Wall(stageSize / 5, texture, Vertikal, stageSize / 10 * (2 + 2 * j), stageSize / 10 * ((i - k) * 2 - 1)));
 		}
 	}
 
@@ -215,16 +215,18 @@ void rotateCam(sf::RenderWindow &window) {
 		angleY = -80;
 	SetCursorPos(xt, yt);
 }
-void generateWalls(std::vector<std::string>& map) 	{
+void generateWalls(std::vector<std::string>& map) {
 	srand(time(0));
+	int j = 0;
 
 		std::string tempstr;
 		for (int i = 0; i < 40; i++)
-			tempstr+= ' ';
-		tempstr[25] = '\0';
-		int id[40];
+			tempstr += ' ';
+		int id[40]{NULL};
+		do {
 		for (int i = 0; i < 30; i++) {
-			id[i] = i;
+			if (id[i] == NULL)
+				id[i] = i;
 		}
 		int wallCount = 1;
 		for (int i = 0; i < 9; i++) {
@@ -249,6 +251,7 @@ void generateWalls(std::vector<std::string>& map) 	{
 			while (id[i - wallCount] == k) {
 				if (!(rand() % 2)) {
 					tempstr[i] = '_';
+					id[i - wallCount] = NULL;
 				}
 				else {
 					tempstr[i] = ' ';
@@ -260,7 +263,17 @@ void generateWalls(std::vector<std::string>& map) 	{
 				tempstr[i - 1] = ' ';
 			wallCount++;
 		}
-		std::cout << tempstr << std::endl;
-
 		map.push_back(tempstr);
+		for (int i = 0; i < tempstr.size(); i++) 			{
+			if (tempstr[i] == '|') 				{
+				tempstr.erase(tempstr.begin() + i);
+				i--;
+			}
+			if (tempstr[i] == '_') 				{
+				tempstr[i] = ' ';
+			}
+		}
+		j++;
+	} while (j < 6);
+	
 }
