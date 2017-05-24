@@ -14,7 +14,7 @@ Character::Character(float _x, float _z) {
 }
 void Character::update(float time, std::vector<Wall> walls) {
 	if (!onGround)
-		dy -= 1.5*time;
+		dy -= 1.5*time*0; //CHANGE THAT AFTER DEBUG
 	xPos += dx*time;
 	collision(dx, 0, 0, walls);
 	yPos += dy*time;
@@ -84,10 +84,12 @@ void Character::collision(float dx, float dy, float dz, std::vector<Wall> walls)
 		yPos = h * 3 + 10;
 	}
 	if (isColided(walls)) {
-		if (dx > 0)  xPos -= w;
-		if (dx < 0)  xPos += w;
-		if (dz > 0)  zPos -= w;
-		if (dz < 0)  zPos += w;
+		if (dx > 0)	xPos -= w*1.25;
+		if (dx < 0)  xPos += w*1.25;
+		dx = 0;
+		if (dz > 0)  zPos -= w*1.25;
+		if (dz < 0)  zPos += w*1.25;
+		dz = 0;
 	}
 }
 bool Character::isColided(std::vector<Wall>walls) {

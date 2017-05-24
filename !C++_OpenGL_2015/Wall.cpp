@@ -8,7 +8,7 @@ Wall::Wall(float size, GLuint _texture, orientation orient, float offX, float of
 	xPos = offX;
 	zPos = offZ;
 	this->orient = orient;
-	glTranslatef(offX, 0, offZ);
+	glTranslatef(offX, height/2, offZ);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glBegin(GL_QUADS);
 	switch (orient) {
@@ -77,7 +77,7 @@ Wall::Wall(float size, GLuint _texture, orientation orient, float offX, float of
 		break;
 	}
 	glEnd();
-	glTranslatef(-offX, 0, -offZ);
+	glTranslatef(-offX, -height/2, -offZ);
 }
 Stage::Stage() {}
 Stage::Stage(float _size, GLuint _texture) {

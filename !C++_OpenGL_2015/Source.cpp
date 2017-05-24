@@ -5,46 +5,71 @@
 #pragma comment (lib,"glu32.lib")
 #include <gl/glut.h>
 #include <vector>
+#include <time.h>
 using namespace sf;
 float const PI = 3.1415;
 #endif
+#include <iostream>
+#include <string>
+
 #include "Wall.h"
 #include "Character.h"
-#include <iostream>
 #include "Source.h"
 
 
 int displX = 1920, displY = 1080;
 float angleX, angleY;
-float x = 0, y = 0, z = 0;
 float sensitivity = 15;
 float stageSize = 1500.f;
 
 GLuint GetTexture(sf::String name) {
 	sf::Image image;
-	image.loadFromFile(name);
+	if (!image.loadFromFile(name))
+		return EXIT_FAILURE;
+	image.flipVertically();
 	GLuint texture;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, image.getSize().x, image.getSize().y, GL_RGBA, GL_UNSIGNED_BYTE, image.getPixelsPtr());
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	return texture;
 }
 
 int main() {
-	RenderWindow window(VideoMode(displX, displY), "Escape from Labyrinth");
+	srand(time(0));
+	std::vector<std::string> maplines;
+	std::string mapline;
+	/*mapline = " | | | | | | | ";
+	maplines.push_back(mapline);*/
+	mapline = " __| _|  _";
+	maplines.push_back(mapline);
+	mapline = " | __| |_| _  ";
+	maplines.push_back(mapline);
+	mapline = "_ |  | __|    ";
+	maplines.push_back(mapline);
+	mapline = "___|_____    ";
+	maplines.push_back(mapline);
+	sf::ContextSettings window_settings;
+	window_settings.depthBits = 24; 
+	window_settings.stencilBits = 8; 
+	window_settings.antialiasingLevel = 2; 
+
+
+	RenderWindow window(VideoMode(displX, displY), "Escape from Labyrinth", sf::Style::Resize,window_settings);
 	ShowCursor(FALSE);
-	Texture t;
-	t.loadFromFile("assets/background.jpg");
+	Texture t; t.loadFromFile("assets/background.jpg");
 	Sprite background(t);
+
 	GLuint texture;
 	texture = GetTexture("assets/myside.jpg");
+	GLuint texture1;
+	texture1 = GetTexture("assets/1.jpg");
 
 	glutSettings();
 
-	Character pl(150, 150);
+	Character pl(1500, 1500, 1500);
 	Clock clock;
 	//Main cycle is here
 	while (window.isOpen()) {
@@ -59,7 +84,6 @@ int main() {
 			if (event.type == Event::Closed)
 				window.close();
 		}
-		pl.keyboard(angleX, angleY);
 		std::vector<Wall> walls;
 
 		rotateCam(window);
@@ -69,8 +93,10 @@ int main() {
 		window.popGLStates();
 
 		glutLookAt(pl);
-
 		generateOuterWalls(walls, texture);
+		generateInnerWalls(walls, texture1, maplines);
+
+		pl.keyboard(angleX, angleY);
 		pl.update(time, walls);
 		window.display();
 	}
@@ -91,12 +117,15 @@ void glutLookAt(Character &pl) {
 }
 
 void glutSettings() {
+	glShadeModel(GL_SMOOTH);                            // Enable Smooth Shading
+	glClearColor(0.0f, 0.0f, 0.0f, 0.5f);               // Black Background
+	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 	glClearDepth(1.f);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(90.f, 1.f, 1.f, 30000.f);
+	gluPerspective(90.f, 1.f, 1.f, 5000.f);
 	glEnable(GL_TEXTURE_2D);
 }
 
@@ -110,7 +139,58 @@ void generateOuterWalls(std::vector<Wall> &walls, const GLuint &texture) {
 	Stage a(stageSize, texture);
 	glTranslatef(-stageSize, 0, -stageSize);
 }
+void generateInnerWalls(std::vector<Wall> &walls, const GLuint &texture,std::vector<std::string> &str) {
+	// c - элементы строки
+	// e - сроки
+	for (int j = 0; j < str.size(); j++) 		{
+		int k = 0;
+		for (int i = 1; i <= str[j].size(); i++) {
+			if (str[j][i - 1] == ' ')
+				continue;
+			if (str[j][i - 1] == '|') {
+				walls.push_back(Wall(stageSize / 5, texture, Horizontal, stageSize / 10 * (j*2 + 1), stageSize / 10 * (i-k-1)*2));
+				k++;
+			}
+			if (str[j][i - 1] == '_')
+				if (j == 19)
+					continue;
+				else
+					walls.push_back(Wall(stageSize / 5, texture, Vertikal, stageSize / 10 * (2 + 2 * j), stageSize / 10 * ((i-k) * 2 - 1)));
+		}
+	}
 
+
+	//a = Array(c);
+	//b = Array(c);
+	//var k = Array(c),
+	//	
+	//// Цикл по строкам
+	//for (cr_l = 0; cr_l < e; cr_l++) {
+	//	// Проверка принадлежности ячейки в строке к какому-либо множеству        
+	//	for (i = 0; i < c; i++)
+	//		0 == cr_l && (a[i] = 0), d.clearRect(13 * i + 3, 13 * cr_l + 3, 10, 10), k[i] = 0, 1 == b[i] && (b[i] = a[i] = 0), 0 == a[i] && (a[i] = q++);
+
+	//	// Создание случайным образом стенок справа и снизу
+	//	for (i = 0; i < c; i++) {
+	//		k[i] = Math.floor(2 * Math.random()), b[i] = Math.floor(2 * Math.random());
+
+	//		if ((0 == k[i] || cr_l == e - 1) && i != c - 1 && a[i + 1] != a[i]) {
+	//			var l = a[i + 1];
+	//			for (j = 0; j < c; j++) a[j] == l && (a[j] = a[i]);
+	//			d.clearRect(13 * i + 3, 13 * cr_l + 3, 15, 10)
+	//		}
+	//		cr_l != e - 1 && 0 == b[i] && d.clearRect(13 * i + 3, 13 * cr_l + 3, 10, 15)
+	//	}
+
+	//	// Проверка на замкнутые области.
+	//	for (i = 0; i < c; i++) {
+	//		var p = l = 0;
+	//		for (j = 0; j < c; j++) a[i] == a[j] && 0 == b[j] ? p++ : l++;
+	//		0 == p && (b[i] = 0, d.clearRect(13 * i + 3, 13 * cr_l + 3, 10, 15))
+	//	}
+	//}
+
+}
 void rotateCam(sf::RenderWindow &window) {
 	POINT mouseXY;
 	GetCursorPos(&mouseXY);
@@ -126,3 +206,8 @@ void rotateCam(sf::RenderWindow &window) {
 		angleY = -80;
 	SetCursorPos(xt, yt);
 }
+
+
+
+
+
