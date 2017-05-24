@@ -40,17 +40,26 @@ GLuint GetTexture(sf::String name) {
 int main() {
 	srand(time(0));
 	std::vector<std::string> maplines;
-	std::string mapline;
+	generateWalls(maplines);
+
+
+
+
 	/*mapline = " | | | | | | | ";
+
+
+
+
+
 	maplines.push_back(mapline);*/
-	mapline = " __| _|  _";
-	maplines.push_back(mapline);
-	mapline = " | __| |_| _  ";
+	/*mapline = " |  |__ | | ";
+	maplines.push_back(mapline);*/
+	/*mapline = " | __| |_| _  ";
 	maplines.push_back(mapline);
 	mapline = "_ |  | __|    ";
 	maplines.push_back(mapline);
 	mapline = "___|_____    ";
-	maplines.push_back(mapline);
+	maplines.push_back(mapline);*/
 	sf::ContextSettings window_settings;
 	window_settings.depthBits = 24; 
 	window_settings.stencilBits = 8; 
@@ -117,8 +126,8 @@ void glutLookAt(Character &pl) {
 }
 
 void glutSettings() {
-	glShadeModel(GL_SMOOTH);                            // Enable Smooth Shading
-	glClearColor(0.0f, 0.0f, 0.0f, 0.5f);               // Black Background
+	glShadeModel(GL_SMOOTH);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
 	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
@@ -206,8 +215,52 @@ void rotateCam(sf::RenderWindow &window) {
 		angleY = -80;
 	SetCursorPos(xt, yt);
 }
+void generateWalls(std::vector<std::string>& map) 	{
+	srand(time(0));
 
+		std::string tempstr;
+		for (int i = 0; i < 40; i++)
+			tempstr+= ' ';
+		tempstr[25] = '\0';
+		int id[40];
+		for (int i = 0; i < 30; i++) {
+			id[i] = i;
+		}
+		int wallCount = 1;
+		for (int i = 0; i < 9; i++) {
+			if (id[i] != id[i + 1])
+				if (!(rand() % 2)) {
+					tempstr[i + wallCount] = '|';
+					wallCount++;
+				}
+				else
+					id[i + 1] = id[i];
+			else {
+				tempstr[i + wallCount] = '|';
+				wallCount++;
+			}
+		}
+		wallCount = 0;
+		for (int i = 0; i < 10; i++) {
+			bool isHole = false;
+			if (tempstr[i] == '|')
+				continue;
+			int k = id[i - wallCount];
+			while (id[i - wallCount] == k) {
+				if (!(rand() % 2)) {
+					tempstr[i] = '_';
+				}
+				else {
+					tempstr[i] = ' ';
+					isHole = true;
+				}
+				i++;
+			}
+			if (!isHole)
+				tempstr[i - 1] = ' ';
+			wallCount++;
+		}
+		std::cout << tempstr << std::endl;
 
-
-
-
+		map.push_back(tempstr);
+}
