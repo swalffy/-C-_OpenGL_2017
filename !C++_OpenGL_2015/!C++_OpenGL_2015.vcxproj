@@ -130,6 +130,7 @@
   <ItemGroup>
     <ClCompile Include="bonus.cpp" />
     <ClCompile Include="Character.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Wall.cpp" />
   </ItemGroup>

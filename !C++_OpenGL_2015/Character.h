@@ -5,14 +5,17 @@
 #include <SFML/OpenGL.hpp>
 #pragma comment (lib,"glu32.lib")
 #include <gl/glut.h>
+#include <vector>
+#include <time.h>
+#include <iostream>
+#include <string>
 using namespace sf;
 float const PI = 3.1415;
-float size = 20.f;
 #endif
 #include "Wall.h"
 #include "bonus.h"
-#include <string>
-#include <iostream>
+
+
 class Character {
 public:
 	float xPos, yPos, zPos;
@@ -31,6 +34,6 @@ public:
 	void keyboard(float, float);
 	void collision(float, float, float, std::vector<Wall>);
 	void godMode();
-	void takeBonus(bonus, float&);
+	bool takeBonus(bonus, float&);
 };
 

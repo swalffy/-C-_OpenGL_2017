@@ -5,7 +5,7 @@ Character::Character(float _x, float _y, float _z) {
 	dx = 0; dy = 0; dz = 0;
 	w = 15; h = 40; speed = 40;
 	onGround = false;
-	god = true;
+	god = false;
 }
 Character::Character(float _x, float _z) {
 	xPos = _x; yPos = 300; zPos = _z;
@@ -39,6 +39,7 @@ void Character::update(float time, std::vector<Wall> walls) {
 		collision(0, 0, dz, walls);
 		dx = dz = 0;
 	}
+
 }
 bool Character::commonSectionCircle(Wall wall) {
 	float x1, x2, y1, y2;
@@ -101,11 +102,11 @@ void Character::collision(float dx, float dy, float dz, std::vector<Wall> walls)
 		yPos = h * 3 + 10;
 	}
 	if (isColided(walls)) {
-		if (dx > 0)	xPos -= w*1.25;
-		if (dx < 0)  xPos += w*1.25;
+		if (dx > 0)	xPos -= w*3.5;
+		if (dx < 0)  xPos += w*3.5;
 		dx = 0;
-		if (dz > 0)  zPos -= w*1.25;
-		if (dz < 0)  zPos += w*1.25;
+		if (dz > 0)  zPos -= w*3.5;
+		if (dz < 0)  zPos += w*3.5;
 		dz = 0;
 	}
 }
@@ -119,16 +120,17 @@ bool Character::isColided(std::vector<Wall>walls) {
 void Character::godMode() 	{
 	this->god = !this->god;
 }
-void Character::takeBonus(bonus type, float& curtime) 	{
+bool Character::takeBonus(bonus type, float& curtime) 	{
 	switch (type) {
 	case addtime:
-		curtime += 1;
+		curtime += 3;
 		break;
 	case fly:
 		godMode();
 		break;
 	case win:
-		//win level
+		return true;
 		break;
 	}
+	return false;
 }

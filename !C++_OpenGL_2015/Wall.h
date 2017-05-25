@@ -5,6 +5,10 @@
 #include <SFML/OpenGL.hpp>
 #pragma comment (lib,"glu32.lib")
 #include <gl/glut.h>
+#include <vector>
+#include <time.h>
+#include <iostream>
+#include <string>
 using namespace sf;
 float const PI = 3.1415;
 #endif
