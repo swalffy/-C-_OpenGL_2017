@@ -11,3 +11,7 @@ void generateWalls(std::vector<std::string>& );
 void glutSettings();
 
 void glutLookAt(Character &pl);
+
+void ftimeChanger(float &ftime, sf::Clock &clock, int &fsize, float &df);
+
+bool isFree(int id[], int num);

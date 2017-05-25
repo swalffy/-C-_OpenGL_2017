@@ -6,6 +6,7 @@
 #include <gl/glut.h>
 #include <vector>
 #include <time.h>
+#include <SFML\Audio\Music.hpp>
 using namespace sf;
 float const PI = 3.1415;
 #endif
@@ -42,24 +43,14 @@ int main() {
 	std::vector<std::string> maplines;
 	generateWalls(maplines);
 
+	float ftime = 0.3;
+	Font font;
+	font.loadFromFile("assets/CyrilicOld.TTF");
+	int fsize = 30;
+	float df = 1.1;
+	Text timeLeft("", font, fsize);
+	timeLeft.setStyle(sf::Text::Bold);
 
-
-
-	/*mapline = " | | | | | | | ";
-
-
-
-
-
-	maplines.push_back(mapline);*/
-	/*mapline = " |  |__ | | ";
-	maplines.push_back(mapline);*/
-	/*mapline = " | __| |_| _  ";
-	maplines.push_back(mapline);
-	mapline = "_ |  | __|    ";
-	maplines.push_back(mapline);
-	mapline = "___|_____    ";
-	maplines.push_back(mapline);*/
 	sf::ContextSettings window_settings;
 	window_settings.depthBits = 24;
 	window_settings.stencilBits = 8;
@@ -78,7 +69,7 @@ int main() {
 
 	glutSettings();
 
-	Character pl(1500, 1500, 1500);
+	Character pl(1500, 2000, 1500);
 	Clock clock;
 	//Main cycle is here
 	while (window.isOpen()) {
@@ -97,20 +88,49 @@ int main() {
 
 		rotateCam(window);
 
+		ftimeChanger(ftime, clock, fsize, df);
+		//if (ftime < 0) 
+		//	break;
+		timeLeft.setString(std::to_string(ftime * 10));
+		timeLeft.setCharacterSize(fsize);
+
 		window.pushGLStates();
 		window.draw(background);
+		window.draw(timeLeft);
 		window.popGLStates();
+		
 
 		glutLookAt(pl);
-		generateOuterWalls(walls, texture);
 		generateInnerWalls(walls, texture1, maplines);
-
+		generateOuterWalls(walls, texture);
+		if (Keyboard::isKeyPressed(Keyboard::Tilde)) {
+			std::string code;
+			std::cin >> code;
+			if (code == "hesoyam") {
+				ftime += 3;
+			}
+			else if (code == "whosyourdaddy") {
+				pl.godMode();
+			}
+		}
 		pl.keyboard(angleX, angleY);
 		pl.update(time, walls);
+
 		window.display();
 	}
 	glDeleteTextures(1, &texture);
 	return 0;
+}
+
+void ftimeChanger(float &ftime, sf::Clock &clock, int &fsize, float &df) {
+	ftime -= clock.getElapsedTime().asSeconds();
+	if (ftime * 10 < 10) {
+		if (fsize < 28)
+			df = 1.05;
+		if (fsize > 38)
+			df = 0.98;
+		fsize *= df;
+	}
 }
 
 void glutLookAt(Character &pl) {
@@ -149,8 +169,6 @@ void generateOuterWalls(std::vector<Wall> &walls, const GLuint &texture) {
 	glTranslatef(-stageSize, 0, -stageSize);
 }
 void generateInnerWalls(std::vector<Wall> &walls, const GLuint &texture, std::vector<std::string> &str) {
-	// c - элементы строки
-	// e - сроки
 	for (int j = 0; j < str.size(); j++) {
 		int k = 0;
 		for (int i = 1; i <= str[j].size(); i++) {
@@ -167,38 +185,6 @@ void generateInnerWalls(std::vector<Wall> &walls, const GLuint &texture, std::ve
 					walls.push_back(Wall(stageSize / 5, texture, Vertikal, stageSize / 10 * (2 + 2 * j), stageSize / 10 * ((i - k) * 2 - 1)));
 		}
 	}
-
-
-	//a = Array(c);
-	//b = Array(c);
-	//var k = Array(c),
-	//	
-	//// Цикл по строкам
-	//for (cr_l = 0; cr_l < e; cr_l++) {
-	//	// Проверка принадлежности ячейки в строке к какому-либо множеству        
-	//	for (i = 0; i < c; i++)
-	//		0 == cr_l && (a[i] = 0), d.clearRect(13 * i + 3, 13 * cr_l + 3, 10, 10), k[i] = 0, 1 == b[i] && (b[i] = a[i] = 0), 0 == a[i] && (a[i] = q++);
-
-	//	// Создание случайным образом стенок справа и снизу
-	//	for (i = 0; i < c; i++) {
-	//		k[i] = Math.floor(2 * Math.random()), b[i] = Math.floor(2 * Math.random());
-
-	//		if ((0 == k[i] || cr_l == e - 1) && i != c - 1 && a[i + 1] != a[i]) {
-	//			var l = a[i + 1];
-	//			for (j = 0; j < c; j++) a[j] == l && (a[j] = a[i]);
-	//			d.clearRect(13 * i + 3, 13 * cr_l + 3, 15, 10)
-	//		}
-	//		cr_l != e - 1 && 0 == b[i] && d.clearRect(13 * i + 3, 13 * cr_l + 3, 10, 15)
-	//	}
-
-	//	// Проверка на замкнутые области.
-	//	for (i = 0; i < c; i++) {
-	//		var p = l = 0;
-	//		for (j = 0; j < c; j++) a[i] == a[j] && 0 == b[j] ? p++ : l++;
-	//		0 == p && (b[i] = 0, d.clearRect(13 * i + 3, 13 * cr_l + 3, 10, 15))
-	//	}
-	//}
-
 }
 void rotateCam(sf::RenderWindow &window) {
 	POINT mouseXY;
@@ -218,62 +204,95 @@ void rotateCam(sf::RenderWindow &window) {
 void generateWalls(std::vector<std::string>& map) {
 	srand(time(0));
 	int j = 0;
-
-		std::string tempstr;
-		for (int i = 0; i < 40; i++)
-			tempstr += ' ';
-		int id[40]{NULL};
-		do {
-		for (int i = 0; i < 30; i++) {
-			if (id[i] == NULL)
-				id[i] = i;
+	int size = 10;
+	std::string tempstr;
+	for (int i = 0; i < size; i++)
+		tempstr += ' ';
+	int id[15]{ NULL };
+	do {
+		for (int i = 1; i <= 15; i++) {
+			if (id[i-1] == NULL)
+				for (int q = i; q <= 15; q++)
+					if (isFree(id, q)) {
+						id[i-1] = q;
+						break;
+					}		
 		}
-		int wallCount = 1;
-		for (int i = 0; i < 9; i++) {
-			if (id[i] != id[i + 1])
-				if (!(rand() % 2)) {
-					tempstr[i + wallCount] = '|';
-					wallCount++;
+		int i = 1;
+		int walls = 0;
+		do{
+			if (id[i-1] == id[i]) 				{
+				tempstr.insert(tempstr.begin() + i+walls, '|');
+				walls++;
+			}
+			else 				{
+				if (rand() % 2) {
+					tempstr.insert(tempstr.begin() + i+walls, '|');
+					walls++;
 				}
 				else
-					id[i + 1] = id[i];
-			else {
-				tempstr[i + wallCount] = '|';
-				wallCount++;
+					id[i] = id[i-1];
 			}
+			i++;
+		} while (i < size);
+	
+		//===================================================
+		int before = 0;
+		for (int i = 0; i < tempstr.size(); i++) {
+			if (tempstr[i] == ' ' || tempstr[i] == '_')
+				before++;
 		}
-		wallCount = 0;
-		for (int i = 0; i < 10; i++) {
-			bool isHole = false;
-			if (tempstr[i] == '|')
+		i = 0;
+		walls = 0;
+		do {
+			if (tempstr[i+walls] == '|') 	{
+				walls++;
 				continue;
-			int k = id[i - wallCount];
-			while (id[i - wallCount] == k) {
-				if (!(rand() % 2)) {
-					tempstr[i] = '_';
-					id[i - wallCount] = NULL;
-				}
-				else {
-					tempstr[i] = ' ';
-					isHole = true;
-				}
-				i++;
 			}
+			bool isHole = false;
+			int temp = id[i];
+			do {
+				if (tempstr[i + walls] == '|') 	{
+					walls++;
+				}
+				if (rand() % 2)
+					tempstr[i + walls] = '_';
+				else
+					isHole = true;
+				i++;
+			} while (id[i] == temp && (i + walls) < tempstr.size());
 			if (!isHole)
-				tempstr[i - 1] = ' ';
-			wallCount++;
+				tempstr[i - 1 + walls] = ' ';
+		} while (i+walls < tempstr.size());
+
+		int after = 0;
+		for (int i = 0; i < tempstr.size(); i++) {
+			if (tempstr[i] == ' ' || tempstr[i] == '_')
+				after++;
 		}
+
+
+		//=======================================================
+
 		map.push_back(tempstr);
-		for (int i = 0; i < tempstr.size(); i++) 			{
-			if (tempstr[i] == '|') 				{
+		std::cout << tempstr << std::endl;
+		for (int i = 0; i < tempstr.size(); i++) {
+			if (tempstr[i] == '|') {
 				tempstr.erase(tempstr.begin() + i);
 				i--;
 			}
-			if (tempstr[i] == '_') 				{
+			if (tempstr[i] == '_') {
 				tempstr[i] = ' ';
+				id[i] = NULL;
 			}
 		}
 		j++;
-	} while (j < 6);
-	
+	} while (j < 9);
+	return;
+}
+bool isFree(int id[15], int num) {
+	for (int i = 0; i < 15; i++)
+		if (id[i] == num)
+			return false;
+	return true;
 }

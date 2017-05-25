@@ -10,6 +10,8 @@ float const PI = 3.1415;
 float size = 20.f;
 #endif
 #include "Wall.h"
+#include <string>
+#include <iostream>
 class Character {
 public:
 	float xPos, yPos, zPos;
@@ -17,6 +19,7 @@ public:
 	float w, h;
 	float speed;
 	bool onGround;
+	bool god;
 
 	Character(float _x, float _y, float _z);
 	Character(float _x, float _z);
@@ -26,5 +29,6 @@ public:
 	bool isColided(std::vector<Wall>);
 	void keyboard(float, float);
 	void collision(float, float, float, std::vector<Wall>);
+	void godMode();
 };
 
