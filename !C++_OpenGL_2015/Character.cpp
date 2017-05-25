@@ -5,7 +5,7 @@ Character::Character(float _x, float _y, float _z) {
 	dx = 0; dy = 0; dz = 0;
 	w = 15; h = 40; speed = 40;
 	onGround = false;
-	god = false;
+	god = true;
 }
 Character::Character(float _x, float _z) {
 	xPos = _x; yPos = 300; zPos = _z;
@@ -24,6 +24,9 @@ void Character::update(float time, std::vector<Wall> walls) {
 		yPos += dy*time;
 		zPos += dz*time;
 		dx = dz = 0;
+		if (Keyboard::isKeyPressed(Keyboard::Space)) {
+			godMode();
+		}
 	}
 	else {
 		if (!onGround)
@@ -115,4 +118,17 @@ bool Character::isColided(std::vector<Wall>walls) {
 }
 void Character::godMode() 	{
 	this->god = !this->god;
+}
+void Character::takeBonus(bonus type, float& curtime) 	{
+	switch (type) {
+	case addtime:
+		curtime += 1;
+		break;
+	case fly:
+		godMode();
+		break;
+	case win:
+		//win level
+		break;
+	}
 }

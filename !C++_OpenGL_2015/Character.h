@@ -10,6 +10,7 @@ float const PI = 3.1415;
 float size = 20.f;
 #endif
 #include "Wall.h"
+#include "bonus.h"
 #include <string>
 #include <iostream>
 class Character {
@@ -30,5 +31,6 @@ public:
 	void keyboard(float, float);
 	void collision(float, float, float, std::vector<Wall>);
 	void godMode();
+	void takeBonus(bonus, float&);
 };
 

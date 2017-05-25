@@ -16,6 +16,7 @@ float const PI = 3.1415;
 #include "Wall.h"
 #include "Character.h"
 #include "Source.h"
+#include "bonus.h"
 
 
 int displX = 1920, displY = 1080;
@@ -42,6 +43,10 @@ int main() {
 	srand(time(0));
 	std::vector<std::string> maplines;
 	generateWalls(maplines);
+
+	bool bonusAvalible = true;
+	int bPosX = rand() % (int)(stageSize*2);
+	int bPosZ = rand() % (int)(stageSize * 2);
 
 	float ftime = 0.3;
 	Font font;
@@ -98,11 +103,20 @@ int main() {
 		window.draw(background);
 		window.draw(timeLeft);
 		window.popGLStates();
-		
-
 		glutLookAt(pl);
-		generateInnerWalls(walls, texture1, maplines);
+		generateInnerWalls(walls, texture, maplines);
 		generateOuterWalls(walls, texture);
+		if (bonusAvalible) 			{
+		Bonus b(stageSize / 8, texture1, bPosX, bPosZ);
+		if (sqrt((pl.xPos - b.xPos)*(pl.xPos - b.xPos) + (pl.zPos - b.zPos)*(pl.zPos - b.zPos)) < pl.w * 10) {
+			pl.takeBonus(b.type, ftime);
+			std::cout << "You take " << b.type << " bonus" << std::endl;
+			bonusAvalible = false;
+		}
+		}
+		window.pushGLStates();
+		window.draw(timeLeft);
+		window.popGLStates();
 		if (Keyboard::isKeyPressed(Keyboard::Tilde)) {
 			std::string code;
 			std::cin >> code;
@@ -113,15 +127,15 @@ int main() {
 				pl.godMode();
 			}
 		}
+	
+
 		pl.keyboard(angleX, angleY);
 		pl.update(time, walls);
-
 		window.display();
 	}
-	glDeleteTextures(1, &texture);
+	glDeleteTextures(1, &texture);glDeleteTextures(1, &texture1);
 	return 0;
 }
-
 void ftimeChanger(float &ftime, sf::Clock &clock, int &fsize, float &df) {
 	ftime -= clock.getElapsedTime().asSeconds();
 	if (ftime * 10 < 10) {
@@ -132,7 +146,6 @@ void ftimeChanger(float &ftime, sf::Clock &clock, int &fsize, float &df) {
 		fsize *= df;
 	}
 }
-
 void glutLookAt(Character &pl) {
 	glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -144,7 +157,6 @@ void glutLookAt(Character &pl) {
 		pl.zPos - cos(angleX / 180 * PI),
 		0, 1, 0);
 }
-
 void glutSettings() {
 	glShadeModel(GL_SMOOTH);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
@@ -157,7 +169,6 @@ void glutSettings() {
 	gluPerspective(90.f, 1.f, 1.f, 5000.f);
 	glEnable(GL_TEXTURE_2D);
 }
-
 void generateOuterWalls(std::vector<Wall> &walls, const GLuint &texture) {
 
 	walls.push_back(Wall(stageSize * 2, texture, Vertikal, 0, stageSize));
@@ -235,8 +246,7 @@ void generateWalls(std::vector<std::string>& map) {
 			}
 			i++;
 		} while (i < size);
-	
-		//===================================================
+
 		int before = 0;
 		for (int i = 0; i < tempstr.size(); i++) {
 			if (tempstr[i] == ' ' || tempstr[i] == '_')
@@ -270,12 +280,7 @@ void generateWalls(std::vector<std::string>& map) {
 			if (tempstr[i] == ' ' || tempstr[i] == '_')
 				after++;
 		}
-
-
-		//=======================================================
-
 		map.push_back(tempstr);
-		std::cout << tempstr << std::endl;
 		for (int i = 0; i < tempstr.size(); i++) {
 			if (tempstr[i] == '|') {
 				tempstr.erase(tempstr.begin() + i);
