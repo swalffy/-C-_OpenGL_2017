@@ -114,11 +114,6 @@ void generateWalls(std::vector<std::string>& map) {
 			i++;
 		} while (i < size);
 
-		int before = 0;
-		for (int i = 0; i < tempstr.size(); i++) {
-			if (tempstr[i] == ' ' || tempstr[i] == '_')
-				before++;
-		}
 		i = 0;
 		walls = 0;
 		do {
@@ -142,11 +137,6 @@ void generateWalls(std::vector<std::string>& map) {
 				tempstr[i - 1 + walls] = ' ';
 		} while (i+walls < tempstr.size());
 
-		int after = 0;
-		for (int i = 0; i < tempstr.size(); i++) {
-			if (tempstr[i] == ' ' || tempstr[i] == '_')
-				after++;
-		}
 		map.push_back(tempstr);
 		for (int i = 0; i < tempstr.size(); i++) {
 			if (tempstr[i] == '|') {
