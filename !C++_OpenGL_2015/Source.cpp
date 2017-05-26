@@ -243,8 +243,8 @@ int gameFunct(bool fullscreen) 	{
 		bType = addtime;
 	else
 		bType = fly;
-	int ePosX = 2800;
-	int ePosZ = 2800;
+	int ePosX = 2750;
+	int ePosZ = 2750;
 
 	float ftime = 3;
 	Font font;
@@ -345,7 +345,6 @@ int mainMenuFunc() {
 	glutSettings();
 	RenderWindow window(VideoMode(1360, 768), "MainMenu|Escape from Labyrinth", sf::Style::Resize || sf::Style::Close, window_settings);
 	while (window.isOpen()) {
-		ShowCursor(TRUE);
 		Event event;
 		while (window.pollEvent(event)) {
 			if (event.type == Event::Closed) {
